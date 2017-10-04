@@ -1,5 +1,5 @@
 
-if ( Emulator === undefined )
+if ( typeof Emulator === "undefined" )
 {
   throw new Error( "Emulator is not yet defined!" );
 }
