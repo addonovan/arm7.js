@@ -36,14 +36,13 @@ var Emulator = {
     },
     nextLine: () =>
     {
-        this.hideLine();
+        Emulator.hideLine();
         Emulator.controls.offset += 4;
-        this.updateLine();
+        Emulator.updateLine();
     },
     hideLine: () => $("li[addr=" + Emulator.controls.offset + "]").removeClass("selected"),
     updateLine: () => $("li[addr=" + Emulator.controls.offset + "]").addClass("selected"),
     ready: () => {}
-
 }
 
 Emulator.utils.setStatus = function(bitName, flag)
@@ -268,13 +267,14 @@ Emulator.ready = () =>
 
     // add controls
     $("<div></div>").attr("id", "controls").appendTo(tools);
-    $("div#controls").each(() =>
+    $("div#controls").each(function()
     {
-
         var self = $(this);
+     
         var buttons = $("<div></div>").attr("id", "controlButtons").appendTo(self);
+        
 
-        $("<button></button>").html("Run").click(() =>
+        $("<button></button>").html("Run").click(function() 
         {
 
             var self = $(this);
@@ -300,7 +300,7 @@ Emulator.ready = () =>
             var label = $("<label>").text(text);
             var input = $("<input type='radio' name='registerBase'>");
 
-            input.click(() =>
+            input.click(function() 
             {
                 if ($(this).is(":checked"))
                 {
@@ -319,7 +319,7 @@ Emulator.ready = () =>
 
     // add registers
     $("<div></div>").attr("id", "registers").appendTo(tools);
-    $("div#registers").each(() =>
+    $("div#registers").each(function() 
     {
 
         var self = $(this);

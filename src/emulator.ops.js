@@ -5,6 +5,9 @@ if (typeof Emulator === "undefined")
 
 Emulator.ops = {};
 
+identifier  = x => x.type === "identifier"
+register    = x => x.subtype == "register"
+
 if (typeof Emulator.utils === "undefined")
 {
     Emulator.utils = {};
@@ -52,7 +55,7 @@ Emulator.ops.swi = (args) =>
 Emulator.ops.mov = function(args)
 {
     // type checking first
-    if (args[0].type !== "identifier" && args[0].subtype !== "register")
+    if (!identifier(args[0]) && !register(args[0]))
     {
         Emulator.utils.fail("mov arg(0) expected register identifier");
     }
@@ -60,7 +63,7 @@ Emulator.ops.mov = function(args)
     var dst = args[0].val;
 
     // copy value from another register
-    if (args[1].type === "identifier" && args[1].subtype === "register")
+    if (identifier(args[1]) && register(args[1]))
     {
         var src = args[1].val;
 
@@ -89,37 +92,20 @@ Emulator.ops.mvn = function(args)
 
 Emulator.ops.add = function(args)
 {
-    var dst = args[0].val;
-    var a, b;
+    var a, b, i;
 
     if (args.length === 2)
     {
-        a = Emulator.getRegister(dst);
-
-        if (args[1].type === "identifier")
-        {
-            b = Emulator.getRegister(args[1].val);
-        }
-        else
-        {
-            b = i32.fromLiteral(args[1]);
-        }
+        i = 1;
     }
     else
     {
-        a = Emulator.getRegister(args[1].val);
-
-        if (args[2].type === "identifier")
-        {
-            b = Emulator.getRegister(args[2].val);
-        }
-        else
-        {
-            b = i32.fromLiteral(args[2]);
-        }
+        i = 2;
     }
 
-    Emulator.getRegister(dst).copy(a.add(b));
+    a = Emulator.getRegister(args[i-1].val);
+    b = identifier(args[i]) ? Emulator.getRegister(args[i].val) : i32.fromLiteral(args[i]);
+    Emulator.getRegister(args[0].val).copy(a.add(b));
 }
 
 //
@@ -148,23 +134,10 @@ Emulator.ops.cmp = function(args)
     a.sub(b, true);
 }
 
-Emulator.utils.getStatus = function()
-{
-    return this.bitCount(Emulator.getRegister(15).bin().substring(2), 32).substring(0, 4);
-}
-
-Emulator.utils.lt = function()
-{
-    return this.getStatus()[0] === "1";
-}
-Emulator.utils.eq = function()
-{
-    return this.getStatus()[1] === "1";
-}
-Emulator.utils.gt = function()
-{
-    return !this.eq() && !this.lt();
-}
+Emulator.utils.getStatus = () => this.bitCount(Emulator.getRegister(15).bin().substring(2), 32).substring(0, 4);
+Emulator.utils.lt = () => this.getStatus()[0] === "1"
+Emulator.utils.eq = () => this.getStatus()[1] === "1"
+Emulator.utils.gt = () => !this.eq() && !this.lt()
 
 Emulator.ops.bal = function(args)
 {
@@ -183,28 +156,11 @@ Emulator.ops.bal = function(args)
     Emulator.controls.offset = addr - 4; // -4 so step() will place it in the right location
 }
 
-Emulator.ops.beq = function(args)
-{
-    if (Emulator.utils.eq()) Emulator.ops.bal(args);
-}
-Emulator.ops.bne = function(args)
-{
-    if (!Emulator.utils.eq()) Emulator.ops.bal(args);
-}
-Emulator.ops.blt = function(args)
-{
-    if (Emulator.utils.lt()) Emulator.ops.bal(args);
-}
-Emulator.ops.bgt = function(args)
-{
-    if (Emulator.utils.gt()) Emulator.ops.bal(args);
-}
+Emulator.ops.bne = args => !Emulator.utils.eq() && Emulator.ops.bal(args)
+Emulator.ops.beq = args =>  Emulator.utils.eq() && Emulator.ops.bal(args)
+Emulator.ops.blt = args =>  Emulator.utils.lt() && Emulator.ops.bal(args)
+Emulator.ops.bgt = args =>  Emulator.utils.gt() && Emulator.ops.bal(args)
 
-Emulator.ops.ble = function(args)
-{
-    if (Emulator.utils.lt() || Emulator.utils.eq()) Emulator.ops.bal(args);
-}
-Emulator.ops.bge = function(args)
-{
-    if (Emulator.utils.gt() || Emulator.utils.eq()) Emulator.ops.bal(args);
-}
+Emulator.ops.ble = args => (Emulator.utils.lt() || Emulator.utils.eq()) && Emulator.ops.bal(args)
+Emulator.ops.bge = args => (Emulator.utils.gt() || Emulator.utils.eq()) && Emulator.ops.bal(args)
+
