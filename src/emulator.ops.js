@@ -5,6 +5,9 @@ if (typeof Emulator === "undefined")
 
 Emulator.ops = {};
 
+identifier  = x => x.type === "identifier"
+register    = x => x.subtype == "register"
+
 if (typeof Emulator.utils === "undefined")
 {
     Emulator.utils = {};
@@ -52,7 +55,7 @@ Emulator.ops.swi = (args) =>
 Emulator.ops.mov = function(args)
 {
     // type checking first
-    if (args[0].type !== "identifier" && args[0].subtype !== "register")
+    if (!identifier(args[0]) && !register(args[0]))
     {
         Emulator.utils.fail("mov arg(0) expected register identifier");
     }
@@ -60,7 +63,7 @@ Emulator.ops.mov = function(args)
     var dst = args[0].val;
 
     // copy value from another register
-    if (args[1].type === "identifier" && args[1].subtype === "register")
+    if (identifier(args[1]) && register(args[1]))
     {
         var src = args[1].val;
 
@@ -89,37 +92,20 @@ Emulator.ops.mvn = function(args)
 
 Emulator.ops.add = function(args)
 {
-    var dst = args[0].val;
-    var a, b;
+    var a, b, i;
 
     if (args.length === 2)
     {
-        a = Emulator.getRegister(dst);
-
-        if (args[1].type === "identifier")
-        {
-            b = Emulator.getRegister(args[1].val);
-        }
-        else
-        {
-            b = i32.fromLiteral(args[1]);
-        }
+        i = 1;
     }
     else
     {
-        a = Emulator.getRegister(args[1].val);
-
-        if (args[2].type === "identifier")
-        {
-            b = Emulator.getRegister(args[2].val);
-        }
-        else
-        {
-            b = i32.fromLiteral(args[2]);
-        }
+        i = 2;
     }
 
-    Emulator.getRegister(dst).copy(a.add(b));
+    a = Emulator.getRegister(args[i-1].val);
+    b = identifier(args[i]) ? Emulator.getRegister(args[i].val) : i32.fromLiteral(args[i]);
+    Emulator.getRegister(args[0].val).copy(a.add(b));
 }
 
 //
