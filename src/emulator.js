@@ -190,15 +190,10 @@ class i32
         {
             var sum = this.bits[i] + other.bits[i] + carry[0];
 
-            if (sum === 0 || sum === 1)
+            if ( sum < 4 )
             {
-                result.bits[i] = sum;
-                carry.unshift(0);
-            }
-            else if (sum === 2 || sum === 3)
-            {
-                result.bits[i] = sum - 2;
-                carry.unshift(1);
+              result.bits[i] = sum & 1
+              carry.unshift(+(sum>1))
             }
         }
 
