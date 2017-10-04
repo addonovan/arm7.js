@@ -1,22 +1,13 @@
 /* document set up */
 
 var Emulator = {
-
     registerCount: 16,
     registers: [],
-
-    address:
-    {},
-    labels:
-    {},
-
-    utils:
-    {},
-    ops:
-    {},
-    controls:
-    {},
-
+    address: {},
+    labels: {},
+    utils: {},
+    ops: {},
+    controls: {},
     registerBase: 10,
     redraw: function(type)
     {
@@ -43,27 +34,15 @@ var Emulator = {
             $("td#r" + i).text(reg);
         }
     },
-
-    nextLine: function()
+    nextLine: () =>
     {
         this.hideLine();
         Emulator.controls.offset += 4;
         this.updateLine();
     },
-
-    hideLine: function()
-    {
-        $("li[addr=" + Emulator.controls.offset + "]").removeClass("selected");
-    },
-
-    updateLine: function()
-    {
-        $("li[addr=" + Emulator.controls.offset + "]").addClass("selected");
-    },
-
-    ready: function() {
-
-    },
+    hideLine: () => $("li[addr=" + Emulator.controls.offset + "]").removeClass("selected"),
+    updateLine: () => $("li[addr=" + Emulator.controls.offset + "]").addClass("selected"),
+    ready: () => {}
 
 }
 
@@ -270,32 +249,32 @@ class i32
     }
 }
 
-$(document).ready(function()
+$(document).ready(() =>
 {
     $("div#source").css("margin-left", $("div#tools").outerWidth() + 10);
 });
 
-$("div#source ul li").first().each(function()
+$("div#source ul li").first().each(() =>
 {
 
     $(this).addClass("selected");
 
 });
 
-Emulator.ready = function()
+Emulator.ready = () =>
 {
     $("pre#src").remove();
     var tools = $("<div></div>").attr("id", "tools").appendTo("body");
 
     // add controls
     $("<div></div>").attr("id", "controls").appendTo(tools);
-    $("div#controls").each(function()
+    $("div#controls").each(() =>
     {
 
         var self = $(this);
         var buttons = $("<div></div>").attr("id", "controlButtons").appendTo(self);
 
-        $("<button></button>").html("Run").click(function()
+        $("<button></button>").html("Run").click(() =>
         {
 
             var self = $(this);
@@ -321,7 +300,7 @@ Emulator.ready = function()
             var label = $("<label>").text(text);
             var input = $("<input type='radio' name='registerBase'>");
 
-            input.click(function()
+            input.click(() =>
             {
                 if ($(this).is(":checked"))
                 {
@@ -336,12 +315,11 @@ Emulator.ready = function()
         radioButton("Hexadecimal", 16);
         radioButton("Decimal", 10);
         radioButton("Binary", 2);
-
     });
 
     // add registers
     $("<div></div>").attr("id", "registers").appendTo(tools);
-    $("div#registers").each(function()
+    $("div#registers").each(() =>
     {
 
         var self = $(this);
@@ -380,7 +358,7 @@ Emulator.ready = function()
 
 function getRegisterObject(i)
 {
-    if (typeof(i) === "string")
+    if (typeof i === "string")
     {
         return Emulator.registers[parseInt(i.substring(1))];
     }
@@ -407,12 +385,5 @@ Emulator.setRegister = function(i, val)
     Emulator.redraw();
 };
 
-Emulator.getRegister = function(i)
-{
-    return getRegisterObject(i);
-};
-
-function isRegister(val)
-{
-    return val.toLowerCase().startsWith("r");
-}
+Emulator.getRegister = i => getRegisterObject(i)
+isRegister = val => val.toLowerCase().startsWith("r")
