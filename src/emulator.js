@@ -383,7 +383,7 @@ Emulator.setRegister = function(i, val)
         getRegisterObject(i).copy(new i32(val));
     }
     Emulator.redraw();
-};
+}
 
 Emulator.getRegister = i => getRegisterObject(i)
 isRegister = val => val.toLowerCase().startsWith("r")

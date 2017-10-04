@@ -78,4 +78,4 @@ Emulator.controls.step = function()
 
     Emulator.nextLine();
     Emulator.redraw();
-};
+}
