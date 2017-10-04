@@ -114,7 +114,7 @@ Emulator.ops.add = function(args)
 
 Emulator.ops.cmp = function(args)
 {
-    if (args[0].type !== "identifier" || args[0].subtype !== "register")
+    if (!identifier(args[0]) || !register(args[0]))
     {
         Emulator.utils.fail("cmp arg(0) was expected to be a refister identifier, found: " + args[0].type + ": " + args[0].subtype);
     }
@@ -122,7 +122,7 @@ Emulator.ops.cmp = function(args)
     var a = Emulator.getRegister(args[0].val);
     var b;
 
-    if (args[1].type === "identifier" && args[1].subtype === "register")
+    if (identifier(args[1]) && register(args[1]))
     {
         b = Emulator.getRegister(args[1].val);
     }
@@ -146,7 +146,7 @@ Emulator.ops.bal = function(args)
         Emulator.utils.fail("expected 1 arg, found: " + args.length);
     }
 
-    if (args[0].type !== "identifier" || args[0].subtype !== "label")
+    if (!identifier(args[0])  || args[0].subtype !== "label")
     {
         Emulator.utils.fail("arg(0) expected identifier: label, found " + args[0].type + ": " + args[0].subtype);
     }

@@ -11,8 +11,10 @@ var Emulator = {
     registerBase: 10,
     redraw: function(type)
     {
-        if (type === undefined) type = Emulator.registerBase;
-        else Emulator.registerBase = type;
+        if (typeof type === "undefined") 
+          type = Emulator.registerBase;
+        else 
+          Emulator.registerBase = type;
 
         for (var i = 0; i < Emulator.registerCount; i++)
         {
@@ -85,7 +87,7 @@ class i32
             this.bits.push(0);
         }
 
-        if (value === undefined) return;
+        if (typeof value === "undefined") return;
 
         if (value.constructor === i32)
         {
@@ -182,7 +184,7 @@ class i32
 
     add(other, affectStatus)
     {
-        if (affectStatus === undefined) affectStatus = false;
+        if (typeof affectStatus === "undefined") affectStatus = false;
 
         var result = new i32();
         var carry = [0];
