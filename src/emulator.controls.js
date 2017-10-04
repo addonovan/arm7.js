@@ -6,11 +6,10 @@ if (Emulator === undefined)
 Emulator.controls = {
     running: true,
     timer: 0,
-
     offset: 0
 };
 
-Emulator.controls.restart = function()
+Emulator.controls.restart = () =>
 {
     Emulator.controls.stop();
 
@@ -30,7 +29,7 @@ Emulator.controls.restart = function()
     }
 }
 
-Emulator.controls.run = function()
+Emulator.controls.run = () =>
 {
     Emulator.controls.timer = setInterval(() =>
     {
@@ -38,13 +37,13 @@ Emulator.controls.run = function()
     }, 500);
 }
 
-Emulator.controls.stop = function()
+Emulator.controls.stop = () =>
 {
     clearInterval(Emulator.controls.timer);
     Emulator.controls.timer = 0;
 }
 
-Emulator.controls.step = function()
+Emulator.controls.step = () =>
 {
     if (!Emulator.controls.running)
     {
@@ -61,7 +60,7 @@ Emulator.controls.step = function()
 
     var fun = Emulator.ops[instruction.op.val];
 
-    if (fun === undefined)
+    if (typeof fun === "undefined")
     {
         Emulator.controls.running = false;
         alert("Undefined opcode: " + instruction.op.val);

@@ -1,40 +1,34 @@
-if (Emulator === undefined)
+if (typeof Emulator === "undefined")
 {
     throw new Error("Emulator has not yet been defined!");
 }
 
 Emulator.ops = {};
 
-if (Emulator.utils === undefined)
+if (typeof Emulator.utils === "undefined")
 {
     Emulator.utils = {};
 }
 
-Emulator.utils.bitCount = function(input, bitCount)
+Emulator.utils.bitCount = (i, bitCount) =>
 {
-    if (bitCount === undefined) bitCount = 32;
-
-    var a = input.toString(2);
-    while (a.length < bitCount)
-    {
-        a = "0" + a;
-    }
-
-    return a;
+    var bitCount = bitCount ? bitCount : 32;
+    return '0'.repeat(bitCount-(i=i.toString(2)).length)+i;
 }
 
-Emulator.utils.fail = function(msg)
+Emulator.utils.fail = (msg) =>
 {
     Emulator.controls.running = false;
     alert(msg);
     throw new Error(msg);
 }
 
-Emulator.utils.expect = function(arg, i, type, subtype) {
+Emulator.utils.expect = (arg, i, type, subtype) =>
+{
 
 }
 
-Emulator.utils.assert = function(msg, expected, actual)
+Emulator.utils.assert = (msg, expected, actual) =>
 {
     if (expected !== actual) Emulator.utils.fail(msg);
 }
@@ -43,7 +37,7 @@ Emulator.utils.assert = function(msg, expected, actual)
 // SWI
 //
 
-Emulator.ops.swi = function(args)
+Emulator.ops.swi = (args) =>
 {
     if (Emulator.getRegister(7).dec() === 1)
     {
