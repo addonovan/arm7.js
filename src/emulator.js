@@ -200,9 +200,9 @@ class i32
         if (affectStatus)
         {
             Emulator.utils.setStatus('N', result.bits[0]); // 0 => positive, 1 => negative
-            Emulator.utils.setStatus('Z', result.zero() ? 1 : 0);
-            Emulator.utils.setStatus('C', carry !== 0 ? 1 : 0);
-            Emulator.utils.setStatus('V', carry[0] ^ carry[1]) // I got this from some university page
+            Emulator.utils.setStatus('Z', +!result.zero());
+            Emulator.utils.setStatus('C', +(carry !== 0)) ;
+            Emulator.utils.setStatus('V', carry[0]^carry[1]) // I got this from some university page
         }
 
         return result;
