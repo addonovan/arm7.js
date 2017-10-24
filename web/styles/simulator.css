@@ -37,6 +37,15 @@ li.selected {
 
 span {
     font-family: "monospace";
+    display: inline-block;
+}
+
+span.label:not(.arg) {
+    margin-top: 1.5em;
+}
+
+span.separator {
+    width: 2em;
 }
 
 span.op {
