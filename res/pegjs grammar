@@ -1,0 +1,65 @@
+asm
+  = objs:( __ obj:( instruction / label ) _* { return obj; } )+ {
+  return objs;
+}
+instruction 
+  = name:(opIdentifier) _ args:(inner_args:argument __ "," __ { return inner_args; })* lastarg:(argument) __ {
+  args.push( lastarg );
+  return {
+    type: "instruction",
+  	op: name,
+    args: args
+  };
+}
+argument = value:( regIdentifier / labelIdentifier / binLiteral / hexLiteral / decLiteral ) __ {
+  return value;
+}
+label = name:(labelIdentifier) ":" __ { return name; }
+// identifiers
+opIdentifier = value:( [a-zA-Z]+ ) { 
+  return {
+    type: "identifier",
+    subtype: "op",
+    value: value.join( '' )
+  };
+}
+regIdentifier = value:( "r" [0-9]+ ) {
+  return {
+    type: "identifier",
+    subtype: "register",
+    value: value.join( '' )
+  };
+}
+labelIdentifier = value:( [A-Za-z0-9_-]+ ) {
+  return {
+    type: "identifier",
+    subtype: "label",
+    value: value.join( '' )
+  };
+}
+// literals
+binLiteral = "#0b" value:( [0-1]+ ) __ {
+  return {
+    type: "literal",
+    subtype: "binary",
+    value: value.join( '' )
+  };
+}
+decLiteral = "#" value:( [0-9]+ ) __ {
+  return {
+    type: "literal",
+    subtype: "decimal",
+    value: value.join( '' )
+  };
+}
+hexLiteral = "#0x" value:( [0-9A-F]+ ) __ {
+  return {
+    type: "literal",
+    subtype: "hexadecimal",
+    value: value.join( '' )
+  };
+}
+// mandatory whitespace
+_ = [ \t\r\n]+
+// optional whitespace
+__ = [ \t\r\n]*
