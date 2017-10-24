@@ -25,6 +25,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   var set_id = $module$kotlinx_html_js.kotlinx.html.set_id_ueiko3$;
   var td = $module$kotlinx_html_js.kotlinx.html.td_vlzo05$;
   var tr = $module$kotlinx_html_js.kotlinx.html.tr_7wec05$;
+  var repeat = Kotlin.kotlin.text.repeat_94bcnn$;
   var table = $module$kotlinx_html_js.kotlinx.html.table_llpdic$;
   var append = $module$kotlinx_html_js.kotlinx.html.dom.append_k9bwru$;
   var get_classes = $module$kotlinx_html_js.kotlinx.html.get_classes_fxodxh$;
@@ -36,7 +37,6 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   var ul = $module$kotlinx_html_js.kotlinx.html.ul_e6giw3$;
   var removeClass = Kotlin.kotlin.dom.removeClass_hhb33f$;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
-  var set_onClickFunction = $module$kotlinx_html_js.kotlinx.html.js.set_onClickFunction_pszlq2$;
   var button = $module$kotlinx_html_js.kotlinx.html.button_whohl6$;
   var div = $module$kotlinx_html_js.kotlinx.html.div_ri36nr$;
   var div_0 = $module$kotlinx_html_js.kotlinx.html.div_59el9d$;
@@ -103,7 +103,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   Interpreter.prototype.step = function () {
     var address = this.registers_0.pc.unsignedValue;
     this.registers_0.pc.plusAssign_za3lpa$(4);
-    var it = this.program_0.get_za3lpa$(address);
+    var it = this.program_0.get_s8cxhz$(address);
     if (!Kotlin.isType(it, Particle$Instruction)) {
       throw new UnsupportedOperationException('Expected Particle.Instruction, found: ' + get_js(Kotlin.getKClassFromExpression(it)));
     }
@@ -495,17 +495,17 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   });
   Object.defineProperty(I32.prototype, 'hexadecimal', {
     get: function () {
-      return toString(this.unsignedValue, 16).toUpperCase();
+      return toString(this.value, 16).toUpperCase();
     }
   });
   Object.defineProperty(I32.prototype, 'value', {
     get: function () {
-      return toLong(this.binary, 2).toInt();
+      return this.get_za3lpa$(0) ? this.unaryMinus().value : toInt(this.binary, 2);
     }
   });
   Object.defineProperty(I32.prototype, 'unsignedValue', {
     get: function () {
-      return toLong(this.binary, 2).toInt();
+      return toLong(this.binary, 2);
     }
   });
   I32.prototype.flip = function () {
@@ -616,6 +616,9 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
       action(element);
     }
   };
+  Program.prototype.get_s8cxhz$ = function (offset) {
+    return this.get_za3lpa$(offset.toInt());
+  };
   Program.prototype.get_za3lpa$ = function (offset) {
     var tmp$;
     tmp$ = this.map_0.get_za3lpa$(offset);
@@ -686,11 +689,12 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   function WebView(viewport) {
     this.onStep_w19xd9$_0 = this.onStep_w19xd9$_0;
     this.registers_0 = this.registers_0;
+    this.lastTimer_0 = null;
     var tmp$;
     while (viewport.hasChildNodes()) {
       viewport.removeChild((tmp$ = viewport.lastChild) != null ? tmp$ : Kotlin.throwNPE());
     }
-    append(viewport, WebView_init$lambda(this));
+    append(viewport, WebView_init$lambda);
   }
   Object.defineProperty(WebView.prototype, 'onStep', {
     get: function () {
@@ -704,6 +708,35 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
     var tmp$, tmp$_0;
     return Kotlin.isType(tmp$_0 = (tmp$ = $receiver.querySelector(selector)) != null ? tmp$ : Kotlin.throwNPE(), HTMLElement) ? tmp$_0 : Kotlin.throwCCE();
   };
+  function WebView$init$lambda$lambda(this$WebView) {
+    return function (it) {
+      this$WebView.onStep();
+      return undefined;
+    };
+  }
+  function WebView$init$lambda$lambda$lambda(this$WebView) {
+    return function () {
+      this$WebView.onStep();
+      return Unit;
+    };
+  }
+  function WebView$init$lambda$lambda_0(this$WebView, this$) {
+    return function (it) {
+      var tmp$, tmp$_0, tmp$_1;
+      if (this$WebView.lastTimer_0 == null) {
+        this$.innerText = 'Stop';
+        tmp$_1 = window.setInterval(WebView$init$lambda$lambda$lambda(this$WebView), 500);
+      }
+       else {
+        this$.innerText = 'Start';
+        tmp$_0 = (tmp$ = this$WebView.lastTimer_0) != null ? tmp$ : Kotlin.throwNPE();
+        window.clearInterval(tmp$_0);
+        tmp$_1 = null;
+      }
+      this$WebView.lastTimer_0 = tmp$_1;
+      return undefined;
+    };
+  }
   function WebView$init$lambda$lambda$lambda$lambda$lambda(closure$i) {
     return function ($receiver) {
       $receiver.text_61zpoe$('r' + closure$i);
@@ -713,7 +746,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   function WebView$init$lambda$lambda$lambda$lambda$lambda_0(closure$i, closure$i32) {
     return function ($receiver) {
       set_id($receiver, 'r' + closure$i);
-      $receiver.text_61zpoe$(closure$i32.hexadecimal);
+      $receiver.text_61zpoe$(closure$i32.binary);
       return Unit;
     };
   }
@@ -724,21 +757,38 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
       return Unit;
     };
   }
-  function WebView$init$lambda$lambda$lambda(this$) {
+  function WebView$init$lambda$lambda$lambda_0(this$) {
     return function (i, i32) {
       tr(this$, void 0, WebView$init$lambda$lambda$lambda$lambda(i, i32));
       return Unit;
     };
   }
-  function WebView$init$lambda$lambda(closure$registers) {
+  function WebView$init$lambda$lambda$lambda$lambda_0($receiver) {
+    $receiver.text_61zpoe$('r99');
+    return Unit;
+  }
+  function WebView$init$lambda$lambda$lambda$lambda_1($receiver) {
+    $receiver.text_61zpoe$(repeat('0', 32));
+    return Unit;
+  }
+  function WebView$init$lambda$lambda$lambda_1($receiver) {
+    th($receiver, void 0, void 0, WebView$init$lambda$lambda$lambda$lambda_0);
+    td($receiver, void 0, WebView$init$lambda$lambda$lambda$lambda_1);
+    var $receiver_0 = $receiver.attributes;
+    var value = 'visibility: hidden;';
+    $receiver_0.put_xwzc9p$('style', value);
+    return Unit;
+  }
+  function WebView$init$lambda$lambda_1(closure$registers) {
     return function ($receiver) {
-      closure$registers.forEach_1rftcc$(WebView$init$lambda$lambda$lambda($receiver));
+      closure$registers.forEach_1rftcc$(WebView$init$lambda$lambda$lambda_0($receiver));
+      tr($receiver, void 0, WebView$init$lambda$lambda$lambda_1);
       return Unit;
     };
   }
   function WebView$init$lambda(closure$registers) {
     return function ($receiver) {
-      table($receiver, void 0, WebView$init$lambda$lambda(closure$registers));
+      table($receiver, void 0, WebView$init$lambda$lambda_1(closure$registers));
       return Unit;
     };
   }
@@ -833,15 +883,15 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
       return li(this$, void 0, WebView$init$lambda$buildLine$lambda(line, closure$buildArguments));
     };
   }
-  function WebView$init$lambda$lambda$lambda_0(closure$buildLine) {
+  function WebView$init$lambda$lambda$lambda_2(closure$buildLine) {
     return function (it) {
       closure$buildLine(it);
       return Unit;
     };
   }
-  function WebView$init$lambda$lambda_0(closure$program, closure$buildLine) {
+  function WebView$init$lambda$lambda_2(closure$program, closure$buildLine) {
     return function ($receiver) {
-      closure$program.forEachLine_6m5y3o$(WebView$init$lambda$lambda$lambda_0(closure$buildLine));
+      closure$program.forEachLine_6m5y3o$(WebView$init$lambda$lambda$lambda_2(closure$buildLine));
       return Unit;
     };
   }
@@ -849,19 +899,27 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
     return function ($receiver) {
       var buildArguments = WebView$init$lambda$buildArguments($receiver);
       var buildLine = WebView$init$lambda$buildLine(buildArguments, $receiver);
-      ul($receiver, void 0, WebView$init$lambda$lambda_0(closure$program, buildLine));
+      ul($receiver, void 0, WebView$init$lambda$lambda_2(closure$program, buildLine));
       return Unit;
     };
   }
   WebView.prototype.init_dzlk23$ = function (program, registers) {
     this.registers_0 = registers;
     var tmp$, tmp$_0;
-    append(Kotlin.isType(tmp$_0 = (tmp$ = document.querySelector('div#tools div#raw')) != null ? tmp$ : Kotlin.throwNPE(), HTMLElement) ? tmp$_0 : Kotlin.throwCCE(), WebView$init$lambda(registers));
+    var $receiver = Kotlin.isType(tmp$_0 = (tmp$ = document.querySelector('button#step')) != null ? tmp$ : Kotlin.throwNPE(), HTMLElement) ? tmp$_0 : Kotlin.throwCCE();
+    $receiver.innerText = 'Step Once';
+    $receiver.onclick = WebView$init$lambda$lambda(this);
     var tmp$_1, tmp$_2;
-    append(Kotlin.isType(tmp$_2 = (tmp$_1 = document.querySelector('div#source')) != null ? tmp$_1 : Kotlin.throwNPE(), HTMLElement) ? tmp$_2 : Kotlin.throwCCE(), WebView$init$lambda_0(program));
+    var $receiver_0 = Kotlin.isType(tmp$_2 = (tmp$_1 = document.querySelector('button#toggle-run')) != null ? tmp$_1 : Kotlin.throwNPE(), HTMLElement) ? tmp$_2 : Kotlin.throwCCE();
+    $receiver_0.innerText = 'Start';
+    $receiver_0.onclick = WebView$init$lambda$lambda_0(this, $receiver_0);
     var tmp$_3, tmp$_4;
+    append(Kotlin.isType(tmp$_4 = (tmp$_3 = document.querySelector('div#tools div#raw')) != null ? tmp$_3 : Kotlin.throwNPE(), HTMLElement) ? tmp$_4 : Kotlin.throwCCE(), WebView$init$lambda(registers));
     var tmp$_5, tmp$_6;
-    (Kotlin.isType(tmp$_4 = (tmp$_3 = document.querySelector('div#source')) != null ? tmp$_3 : Kotlin.throwNPE(), HTMLElement) ? tmp$_4 : Kotlin.throwCCE()).setAttribute('style', 'margin-left: ' + (Kotlin.isType(tmp$_6 = (tmp$_5 = document.querySelector('div#tools')) != null ? tmp$_5 : Kotlin.throwNPE(), HTMLElement) ? tmp$_6 : Kotlin.throwCCE()).clientWidth + 'px');
+    append(Kotlin.isType(tmp$_6 = (tmp$_5 = document.querySelector('div#source')) != null ? tmp$_5 : Kotlin.throwNPE(), HTMLElement) ? tmp$_6 : Kotlin.throwCCE(), WebView$init$lambda_0(program));
+    var tmp$_7, tmp$_8;
+    var tmp$_9, tmp$_10;
+    (Kotlin.isType(tmp$_8 = (tmp$_7 = document.querySelector('div#source')) != null ? tmp$_7 : Kotlin.throwNPE(), HTMLElement) ? tmp$_8 : Kotlin.throwCCE()).setAttribute('style', 'margin-left: ' + (Kotlin.isType(tmp$_10 = (tmp$_9 = document.querySelector('div#tools')) != null ? tmp$_9 : Kotlin.throwNPE(), HTMLElement) ? tmp$_10 : Kotlin.throwCCE()).clientWidth + 'px');
   };
   function WebView$updateRegisters$lambda(this$WebView) {
     return function (i, i32) {
@@ -883,68 +941,38 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
     }
     (tmp$ = document.querySelector('[addr=' + '"' + this.registers_0.pc.value + '"' + ']')) != null ? addClass(tmp$, ['selected']) : null;
   };
-  function WebView_init$lambda$lambda$lambda$lambda$lambda(this$WebView) {
-    return function (it) {
-      this$WebView.onStep();
-      return Unit;
-    };
+  function WebView_init$lambda$lambda$lambda$lambda($receiver) {
+    set_id($receiver, 'step');
+    return Unit;
   }
-  function WebView_init$lambda$lambda$lambda$lambda(this$WebView) {
-    return function ($receiver) {
-      $receiver.text_61zpoe$('Step');
-      set_onClickFunction($receiver, WebView_init$lambda$lambda$lambda$lambda$lambda(this$WebView));
-      return Unit;
-    };
+  function WebView_init$lambda$lambda$lambda$lambda_0($receiver) {
+    set_id($receiver, 'toggle-run');
+    return Unit;
   }
-  function WebView_init$lambda$lambda$lambda$lambda$lambda$lambda(this$WebView) {
-    return function () {
-      this$WebView.onStep();
-      return Unit;
-    };
-  }
-  function WebView_init$lambda$lambda$lambda$lambda$lambda_0(this$WebView) {
-    return function (it) {
-      window.setInterval(WebView_init$lambda$lambda$lambda$lambda$lambda$lambda(this$WebView), 500);
-      return Unit;
-    };
-  }
-  function WebView_init$lambda$lambda$lambda$lambda_0(this$WebView) {
-    return function ($receiver) {
-      $receiver.text_61zpoe$('Run');
-      set_onClickFunction($receiver, WebView_init$lambda$lambda$lambda$lambda$lambda_0(this$WebView));
-      return Unit;
-    };
-  }
-  function WebView_init$lambda$lambda$lambda(this$WebView) {
-    return function ($receiver) {
-      set_id($receiver, 'controls');
-      button($receiver, void 0, void 0, void 0, void 0, WebView_init$lambda$lambda$lambda$lambda(this$WebView));
-      button($receiver, void 0, void 0, void 0, void 0, WebView_init$lambda$lambda$lambda$lambda_0(this$WebView));
-      return Unit;
-    };
+  function WebView_init$lambda$lambda$lambda($receiver) {
+    set_id($receiver, 'controls');
+    button($receiver, void 0, void 0, void 0, void 0, WebView_init$lambda$lambda$lambda$lambda);
+    button($receiver, void 0, void 0, void 0, void 0, WebView_init$lambda$lambda$lambda$lambda_0);
+    return Unit;
   }
   function WebView_init$lambda$lambda$lambda_0($receiver) {
     set_id($receiver, 'raw');
     return Unit;
   }
-  function WebView_init$lambda$lambda(this$WebView) {
-    return function ($receiver) {
-      set_id($receiver, 'tools');
-      div($receiver, void 0, WebView_init$lambda$lambda$lambda(this$WebView));
-      div($receiver, void 0, WebView_init$lambda$lambda$lambda_0);
-      return Unit;
-    };
+  function WebView_init$lambda$lambda($receiver) {
+    set_id($receiver, 'tools');
+    div($receiver, void 0, WebView_init$lambda$lambda$lambda);
+    div($receiver, void 0, WebView_init$lambda$lambda$lambda_0);
+    return Unit;
   }
   function WebView_init$lambda$lambda_0($receiver) {
     set_id($receiver, 'source');
     return Unit;
   }
-  function WebView_init$lambda(this$WebView) {
-    return function ($receiver) {
-      div_0($receiver, void 0, WebView_init$lambda$lambda(this$WebView));
-      div_0($receiver, void 0, WebView_init$lambda$lambda_0);
-      return Unit;
-    };
+  function WebView_init$lambda($receiver) {
+    div_0($receiver, void 0, WebView_init$lambda$lambda);
+    div_0($receiver, void 0, WebView_init$lambda$lambda_0);
+    return Unit;
   }
   WebView.$metadata$ = {
     kind: Kotlin.Kind.CLASS,
