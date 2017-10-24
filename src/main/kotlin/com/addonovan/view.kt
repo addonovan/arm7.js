@@ -22,6 +22,8 @@ class WebView( viewport: Element ) : View
     override lateinit var onStep: () -> Unit
 
     private lateinit var registers: RegisterFile
+
+    private var lastTimer: Int? = null
     
     //
     // Constructor
@@ -45,19 +47,11 @@ class WebView( viewport: Element ) : View
                     id = "controls"
 
                     button {
-                        text( "Step" )
-                        onClickFunction = {
-                            onStep()
-                        }
+                        id = "step"
                     }
 
                     button {
-                        text( "Run" )
-                        onClickFunction = {
-                            window.setInterval( {
-                                onStep()
-                            }, 500 )
-                        }
+                        id = "toggle-run"
                     }
                 }
 
@@ -84,12 +78,50 @@ class WebView( viewport: Element ) : View
     {
         this.registers = registers
 
+        document[ "button#step" ].run {
+            this.innerText = "Step Once"
+
+            this.onclick = {
+                onStep()
+
+                undefined
+            }
+        }
+
+        document[ "button#toggle-run" ].run {
+            this.innerText = "Start"
+
+            // toggle the timer
+            this.onclick = {
+                lastTimer = when( lastTimer )
+                {
+                    null -> {
+                        this.innerText = "Stop"
+
+                        window.setInterval( {
+                            onStep()
+                        }, 500 )
+                    }
+
+                    else -> {
+                        this.innerText = "Start"
+
+                        window.clearInterval( lastTimer!! )
+                        null
+                    }
+                }
+
+                undefined
+            }
+
+        }
+
         // add the register values
         document[ "div#tools div#raw" ].append {
             table {
                 registers.forEach { i, i32 ->
                     tr {
-                        th { text("r$i") }
+                        th { text( "r$i" ) }
                         td {
                             id = "r$i"
                             text( i32.binary )
