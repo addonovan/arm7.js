@@ -11,13 +11,12 @@ current line it's interpreting.
 All you need to do to get it to run is put the following tags
 in your document (scripts at bottom btw):
 * `<link rel="stylesheet" href="/link/to/emulator.css">`
-* `<script src="/path/to/emulator.js"></script>`
-* `<script src="/path/to/emulator.controls.js"></script>`
-* `<script src="/path/to/emulator.parser.js"></script>`
-* `<script src="/path/to/emulator.ops.js"></script>`
+* `<script src="../scripts/peg/peg.js"></script>`
+* `<script src="../scripts/kotlin/kotlin.js"></script>`
+* `<script src="../scripts/kotlin/kotlinx-html-js.js"></script>`
+* `<script src="../scripts/armsim/main.js"></script>`
 
-And then wrap your raw arm7 assembly code in a `<pre>` tag
-with the id of `src`.
+And then wrap your raw arm7 assembly code in a `<pre id="src">` tag.
 
 Currently supported:
 1. Labels
@@ -27,9 +26,10 @@ Currently supported:
 Unsupported operations:
 1. Basically everything else
 
-This is a perfect tool to write an arm7 virtual machine in!
+This is a perfect tool to write an arm7 virtual machine in! (please don't 
+actually do that)
 
 examples:  
-* [fib](//addonovan.github.io/arm7.js/web/examples/fib.html)
+* [fib](//addonovan.github.io/arm7.js/web/examples/fib.html) - fibonacci calculator
 
 
