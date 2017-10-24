@@ -65,6 +65,8 @@ class Program( source: String )
     // Operators
     //
 
+
+    operator fun get( offset: Long ): Any = this[ offset.toInt() ]
     operator fun get( offset: Int ): Any =
             map[ offset ] ?: throw UnsupportedOperationException( "Offset is not word aligned (or instructions are unaligned!)" )
 

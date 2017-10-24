@@ -103,21 +103,23 @@ class I32 : BitArray()
     val hexadecimal: String
         get()
         {
-            return unsignedValue.toString( 16 ).toUpperCase()
+            return value.toString( 16 ).toUpperCase()
         }
 
     /** The signed value of this i32 */
     val value: Int
-        get()
-        {
-            return binary.toLong( 2 ).toInt()
-        }
+        get() =
+            // if this is negative, return the binary value of the negative of this
+            if ( this[ 0 ] )
+                ( -this ).value
+            else
+                binary.toInt( 2 )
 
     /** The unsigned value of this i32 */
-    val unsignedValue: Int
+    val unsignedValue: Long
         get()
         {
-            return binary.toLong( 2 ).toInt()
+            return binary.toLong( 2 )
         }
 
     //

@@ -92,7 +92,7 @@ class WebView( viewport: Element ) : View
                         th { text("r$i") }
                         td {
                             id = "r$i"
-                            text( i32.hexadecimal )
+                            text( i32.binary )
                         }
                     }
                 }

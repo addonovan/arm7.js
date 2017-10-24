@@ -34,6 +34,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   var span_0 = $module$kotlinx_html_js.kotlinx.html.span_6djfml$;
   var li = $module$kotlinx_html_js.kotlinx.html.li_jf6zlv$;
   var ul = $module$kotlinx_html_js.kotlinx.html.ul_e6giw3$;
+  var println = Kotlin.kotlin.io.println_s8jyv4$;
   var removeClass = Kotlin.kotlin.dom.removeClass_hhb33f$;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
   var set_onClickFunction = $module$kotlinx_html_js.kotlinx.html.js.set_onClickFunction_pszlq2$;
@@ -103,7 +104,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   Interpreter.prototype.step = function () {
     var address = this.registers_0.pc.unsignedValue;
     this.registers_0.pc.plusAssign_za3lpa$(4);
-    var it = this.program_0.get_za3lpa$(address);
+    var it = this.program_0.get_s8cxhz$(address);
     if (!Kotlin.isType(it, Particle$Instruction)) {
       throw new UnsupportedOperationException('Expected Particle.Instruction, found: ' + get_js(Kotlin.getKClassFromExpression(it)));
     }
@@ -495,17 +496,17 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   });
   Object.defineProperty(I32.prototype, 'hexadecimal', {
     get: function () {
-      return toString(this.unsignedValue, 16).toUpperCase();
+      return toString(this.value, 16).toUpperCase();
     }
   });
   Object.defineProperty(I32.prototype, 'value', {
     get: function () {
-      return toLong(this.binary, 2).toInt();
+      return this.get_za3lpa$(0) ? this.unaryMinus().value : toInt(this.binary, 2);
     }
   });
   Object.defineProperty(I32.prototype, 'unsignedValue', {
     get: function () {
-      return toLong(this.binary, 2).toInt();
+      return toLong(this.binary, 2);
     }
   });
   I32.prototype.flip = function () {
@@ -616,6 +617,9 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
       action(element);
     }
   };
+  Program.prototype.get_s8cxhz$ = function (offset) {
+    return this.get_za3lpa$(offset.toInt());
+  };
   Program.prototype.get_za3lpa$ = function (offset) {
     var tmp$;
     tmp$ = this.map_0.get_za3lpa$(offset);
@@ -713,7 +717,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   function WebView$init$lambda$lambda$lambda$lambda$lambda_0(closure$i, closure$i32) {
     return function ($receiver) {
       set_id($receiver, 'r' + closure$i);
-      $receiver.text_61zpoe$(closure$i32.hexadecimal);
+      $receiver.text_61zpoe$(closure$i32.binary);
       return Unit;
     };
   }
@@ -867,6 +871,9 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
     return function (i, i32) {
       var tmp$, tmp$_0;
       (Kotlin.isType(tmp$_0 = (tmp$ = document.querySelector('#r' + i)) != null ? tmp$ : Kotlin.throwNPE(), HTMLElement) ? tmp$_0 : Kotlin.throwCCE()).textContent = i32.hexadecimal;
+      if (!Kotlin.equals(i32.unsignedValue, Kotlin.Long.fromInt(i32.value))) {
+        println(i32.binary + ' := ' + Kotlin.toString(i32.value));
+      }
       return Unit;
     };
   }
