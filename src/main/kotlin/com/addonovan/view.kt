@@ -128,6 +128,12 @@ class WebView( viewport: Element ) : View
                         }
                     }
                 }
+
+                tr {
+                    th { text( "r99" ) }
+                    td { text( "0".repeat( 32 ) ) }
+                    attributes[ "style" ] = "visibility: hidden;"
+                }
             }
         }
 

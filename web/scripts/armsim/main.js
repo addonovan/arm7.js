@@ -25,6 +25,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   var set_id = $module$kotlinx_html_js.kotlinx.html.set_id_ueiko3$;
   var td = $module$kotlinx_html_js.kotlinx.html.td_vlzo05$;
   var tr = $module$kotlinx_html_js.kotlinx.html.tr_7wec05$;
+  var repeat = Kotlin.kotlin.text.repeat_94bcnn$;
   var table = $module$kotlinx_html_js.kotlinx.html.table_llpdic$;
   var append = $module$kotlinx_html_js.kotlinx.html.dom.append_k9bwru$;
   var get_classes = $module$kotlinx_html_js.kotlinx.html.get_classes_fxodxh$;
@@ -762,9 +763,26 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
       return Unit;
     };
   }
+  function WebView$init$lambda$lambda$lambda$lambda_0($receiver) {
+    $receiver.text_61zpoe$('r99');
+    return Unit;
+  }
+  function WebView$init$lambda$lambda$lambda$lambda_1($receiver) {
+    $receiver.text_61zpoe$(repeat('0', 32));
+    return Unit;
+  }
+  function WebView$init$lambda$lambda$lambda_1($receiver) {
+    th($receiver, void 0, void 0, WebView$init$lambda$lambda$lambda$lambda_0);
+    td($receiver, void 0, WebView$init$lambda$lambda$lambda$lambda_1);
+    var $receiver_0 = $receiver.attributes;
+    var value = 'visibility: hidden;';
+    $receiver_0.put_xwzc9p$('style', value);
+    return Unit;
+  }
   function WebView$init$lambda$lambda_1(closure$registers) {
     return function ($receiver) {
       closure$registers.forEach_1rftcc$(WebView$init$lambda$lambda$lambda_0($receiver));
+      tr($receiver, void 0, WebView$init$lambda$lambda$lambda_1);
       return Unit;
     };
   }
@@ -865,7 +883,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
       return li(this$, void 0, WebView$init$lambda$buildLine$lambda(line, closure$buildArguments));
     };
   }
-  function WebView$init$lambda$lambda$lambda_1(closure$buildLine) {
+  function WebView$init$lambda$lambda$lambda_2(closure$buildLine) {
     return function (it) {
       closure$buildLine(it);
       return Unit;
@@ -873,7 +891,7 @@ var main = function (_, Kotlin, $module$kotlinx_html_js) {
   }
   function WebView$init$lambda$lambda_2(closure$program, closure$buildLine) {
     return function ($receiver) {
-      closure$program.forEachLine_6m5y3o$(WebView$init$lambda$lambda$lambda_1(closure$buildLine));
+      closure$program.forEachLine_6m5y3o$(WebView$init$lambda$lambda$lambda_2(closure$buildLine));
       return Unit;
     };
   }
