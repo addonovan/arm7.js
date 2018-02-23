@@ -1,0 +1,22 @@
+{
+  "name": "arm7.js",
+  "version": "1.0.0",
+  "description": "arm7 emulator",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/addonovan/arm7.js.git"
+  },
+  "author": "addonovan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/addonovan/arm7.js/issues"
+  },
+  "homepage": "https://github.com/addonovan/arm7.js#readme"
+}
