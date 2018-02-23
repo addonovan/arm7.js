@@ -7,7 +7,8 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "electron ."
   },
   "repository": {
     "type": "git",
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/addonovan/arm7.js/issues"
   },
-  "homepage": "https://github.com/addonovan/arm7.js#readme"
+  "homepage": "https://github.com/addonovan/arm7.js#readme",
+  "dependencies": {
+    "electron": "^1.8.2"
+  }
 }
