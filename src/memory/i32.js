@@ -1,4 +1,3 @@
-
 const SIZE = 32;
 
 class I32
@@ -42,7 +41,14 @@ class I32
     static from( value )
     {
         let negative = value < 0;
-        value = negative ? -value : value;
+
+        // if it's negative, we're going to pretend that we're -(value + 1),
+        // because in 2's complement `value` and `-(value + 1)` have binary
+        // representations that are just flipped representations of each other
+        if ( negative )
+        {
+            value = -( value + 1 );
+        }
 
         value |= 0; // truncate decimal
 
@@ -50,18 +56,12 @@ class I32
         let bits = [];
         for ( let i = 0; i < SIZE; i++ )
         {
-            let bit = ( value >> i ) & 1;
-            bits[ SIZE - i - 1 ] = bit;
+            // grab only the bit we're looking at, and if it's negative, then
+            // we're going to flip it ()
+            bits[ SIZE - i - 1 ] = ( ( value >> i ) & 1 ) ^ negative;
         }
 
-        if ( negative )
-        {
-            return ( new I32( bits ) ).negative();
-        }
-        else
-        {
-            return new I32( bits );
-        }
+        return new I32( bits );
     }
 
     //
@@ -73,23 +73,12 @@ class I32
      */
     get signed()
     {
-        // if we're a negative number, then return the negative value of the negative representation
-        // of this I32
-        if ( this.bits[ 0 ] === 1 )
+        let out = 0;
+        for ( let i = 0; i < SIZE; i++ )
         {
-            return -( this.complement().signed + 1 );
+            out += this.bits[ i ] << ( SIZE - i - 1 );
         }
-        // if we're a positive number, then just return the unsigned value 
-        // (as it won't be different)
-        else
-        {
-            let out = 0;
-            for ( let i = 0; i < SIZE; i++ )
-            {
-                out += this.bits[ i ] << ( SIZE - i - 1 );
-            }
-            return out;
-        }
+        return out;
     }
 
     /**
@@ -97,7 +86,12 @@ class I32
      */
     get unsigned()
     {
-        return parseInt( this.binary.substr( 2 ), 2 );
+        let out = this.bits[ 0 ] * Math.pow( 2, SIZE - 1 );
+        for ( let i = 1; i < SIZE; i++ )
+        {
+            out += this.bits[ i ] << ( SIZE - i - 1 );
+        }
+        return out;
     }
 
     get binary()
@@ -178,13 +172,13 @@ class I32
 
     negative()
     {
-        if ( this.bits[ 0 ] === 0 )
+        if ( this.negative )
         {
-            return this.complement().add( 1 );
+            return this.sub( 1 ).complement();
         }
         else
         {
-            return this.sub( 1 ).complement();
+            return this.complement().add( 1 );
         }
     }
 

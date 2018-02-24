@@ -7,8 +7,8 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "electron ."
+    "test": "mocha test/**/*.spec.js",
+    "start": "electron ."
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,9 @@
   "homepage": "https://github.com/addonovan/arm7.js#readme",
   "dependencies": {
     "electron": "^1.8.2"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.0.1"
   }
 }
