@@ -1,6 +1,6 @@
 asm
-	= i:(j:(directive / labelDefinition / instruction) __ { return j; })* {
-    	return i;
+    = i:(j:(directive / labelDefinition / instruction) __ { return j; })* {
+        return i;
     }
   
 //
@@ -8,42 +8,42 @@ asm
 //
 
 directive
-	= name:(directiveName) _ arg:directiveArgument {
-    	return {
-        	type: "directive",
+    = name:(directiveName) _ arg:directiveArgument {
+        return {
+            type: "directive",
             name: name,
             data: arg
         };
     }
   
 directiveName
-	= "." name:([A-Za-z]+) {
-    	return name.join( "" )
+    = "." name:([A-Za-z]+) {
+        return name.join( "" )
     }
   
 directiveArgument
-	= val:(directiveLabel / directiveArray / directiveString) {
-    	return val;
+    = val:(directiveLabel / directiveArray / directiveString) {
+        return val;
     }
   
 directiveLabel
-	= val:labelName {
-    	return val;
+    = val:labelName {
+        return val;
     }
   
 directiveArray
-	= i:number __ j:("," __ k:number __ { return k; })* {
-    	var list = [ i ];
+    = i:number __ j:("," __ k:number __ { return k; })* {
+        var list = [ i ];
         for ( var i = 0; i < j.length; i++ )
-		{
-        	list.push( j[ i ] );
+        {
+            list.push( j[ i ] );
         }
         return list;
     }
   
 directiveString
-	= '"' text:([^"]*) '"' {
-    	return text.join( "" );
+    = '"' text:([^"]*) '"' {
+        return text.join( "" );
     }
   
 //
@@ -51,17 +51,17 @@ directiveString
 //
 
 instruction
-	= doubleArgInstruction
+    = doubleArgInstruction
     / singleArgInstruction
 
 doubleArgInstruction
-	= op:instructionName _ arg1:argument __ "," __ arg2:argument {
-    	return {
-        	type: "instruction",
+    = op:instructionName _ arg1:argument __ "," __ arg2:argument {
+        return {
+            type: "instruction",
             data: {
-            	opcode: op,
+                opcode: op,
                 args: [
-                	arg1,
+                    arg1,
                     arg2
                 ]
             }
@@ -69,20 +69,20 @@ doubleArgInstruction
     }
 
 singleArgInstruction
-	= op:instructionName _ arg:argument {
-    	return {
-        	type: "instruction",
+    = op:instructionName _ arg:argument {
+        return {
+            type: "instruction",
             data: {
-            	opcode: op,
+                opcode: op,
                 args: [
-                	arg
+                    arg
                 ]
             }
         }
     }
 
 argument
-	= address
+    = address
     / mutatedRegister
     / register
     / registerList
@@ -91,8 +91,8 @@ argument
     / number
 
 instructionName
-	= val:([A-Za-z]+) {
-    	return val.join( "" )
+    = val:([A-Za-z]+) {
+        return val.join( "" )
     }
 
 //
@@ -100,13 +100,13 @@ instructionName
 //
 
 address
-	= postindexedAddress
+    = postindexedAddress
     / preindexedAddress
 
 postindexedAddress
-	= "[" __ address:(register) __ "]" __ "," __ offset:immediate {
-    	return {
-        	type: "address",
+    = "[" __ address:(register) __ "]" __ "," __ offset:immediate {
+        return {
+            type: "address",
             subtype: "postindexed",
             address: address.value,
             offset: offset.value
@@ -114,17 +114,17 @@ postindexedAddress
     }
 
 preindexedAddress
-	= "[" __ address:(register) __ offset:("," __ val:immediate { return val; })?  __"]" {
-    	if ( offset !== null )
+    = "[" __ address:(register) __ offset:("," __ val:immediate { return val; })?  __"]" {
+        if ( offset !== null )
         {
-        	offset = offset.value;
-		}
+            offset = offset.value;
+        }
         else
         {
-        	offset = 0;
-		}
-    	return {
-        	type: "address",
+            offset = 0;
+        }
+        return {
+            type: "address",
             subtype: "preindexed",
             address: address.value,
             offset: offset
@@ -136,67 +136,67 @@ preindexedAddress
 //
 
 registerList
-	= enumeratedRegisterList
+    = enumeratedRegisterList
     / rangedRegisterList
 
 rangedRegisterList
-	= "{" __ start:(numberedRegister) __ "-" __ end:(numberedRegister) __ "}" {
-    	let list = [];
+    = "{" __ start:(numberedRegister) __ "-" __ end:(numberedRegister) __ "}" {
+        let list = [];
         if ( start.value >= end.value ) return null;
         
         for ( var i = start.value; i <= end.value; i++ )
         {
-        	list.push( i );
-		}
+            list.push( i );
+        }
         return {
-        	type: "list",
+            type: "list",
             value: list
         };
     }
 
 enumeratedRegisterList 
-	= "{" __ i:(register) __ j:("," __ k:(register) __ { return k; })* "}" {
-    	let list = [];
+    = "{" __ i:(register) __ j:("," __ k:(register) __ { return k; })* "}" {
+        let list = [];
         list.push( i.value );
         for ( var i = 0; i < j.length; i++ )
         {
-        	list.push( j[ i ].value );
-		}
+            list.push( j[ i ].value );
+        }
         // make sure that the list is always sorted least->greatest
         list = list.sort( ( a, b ) => a - b );
         return {
-        	type: "list",
+            type: "list",
             value: list
         };
     }
 
 mutatedRegister
-	= val:register "!" {
-    	val.type = "mutated-register";
-    	return val;
+    = val:register "!" {
+        val.type = "mutated-register";
+        return val;
     }
 
 register
-	= numberedRegister
+    = numberedRegister
     / namedRegister
     
 namedRegister
-	= val:("sp" / "lr" / "pc") {
-      	return {
-       		type: "register",
+    = val:("sp" / "lr" / "pc") {
+          return {
+               type: "register",
             value: val
-      	}
+          }
     }
     
 numberedRegister
-	= "r" val:("1"[0-5] / [0-9]) {
-    	if ( typeof( val ) !== "string" )
+    = "r" val:("1"[0-5] / [0-9]) {
+        if ( typeof( val ) !== "string" )
         {
-        	val = val.join( "" );
-		}
+            val = val.join( "" );
+        }
     
-    	return {
-        	type: "register",
+        return {
+            type: "register",
             value: parseInt( val )
         }
     }
@@ -206,36 +206,36 @@ numberedRegister
 //
     
 labelDefinition
-	= name:(labelName) ":" {
-    	return {
-        	type: "label",
+    = name:(labelName) ":" {
+        return {
+            type: "label",
             name: name
         }
     }
     
 labelReference
-	= "=" name:(labelName) {
-    	return {
-        	type: "label",
+    = "=" name:(labelName) {
+        return {
+            type: "label",
             name: name
         }
     }
     
 labelName
-	= val:([A-Za-z_][A-Za-z0-9_-]*) {
-    	let output = "";
+    = val:([A-Za-z_][A-Za-z0-9_-]*) {
+        let output = "";
         for ( let i = 0; i < val.length; i++ )
         {
-        	let item = val[ i ];
-        	if ( typeof( item ) === "string" )
+            let item = val[ i ];
+            if ( typeof( item ) === "string" )
             {
-            	output += item;
-			}
+                output += item;
+            }
             else
             {
-            	output += item.join( "" );
-			}
-		}
+                output += item.join( "" );
+            }
+        }
         return output;
     }
     
@@ -244,9 +244,9 @@ labelName
 //
 
 immediate
-	= "#" val:number {
-    	return {
-        	type: "literal",
+    = "#" val:number {
+        return {
+            type: "literal",
             value: val
         };
     }
@@ -256,36 +256,36 @@ immediate
 //
 
 number
-	= binaryNumber
+    = binaryNumber
     / hexadecimalNumber
     / characterNumber
     / decimalNumber
 
 binaryNumber
-	= "0b" val:([01]+) {
-    	return parseInt( val.join( "" ), 2 );
+    = "0b" val:([01]+) {
+        return parseInt( val.join( "" ), 2 );
     }
 
 decimalNumber
-	= val:([0-9]+) {
-    	return parseInt( val.join( "" ) );
+    = val:([0-9]+) {
+        return parseInt( val.join( "" ) );
     }
 
 hexadecimalNumber
-	= "0x" val:([0-9A-Fa-f]+) {
-    	return parseInt( val.join( "" ), 16 );
+    = "0x" val:([0-9A-Fa-f]+) {
+        return parseInt( val.join( "" ), 16 );
     }
 
 characterNumber
-	= "'" val:("\\". / .) "'" {
-    	// if it's an array, that means we have an escape sequence
+    = "'" val:("\\". / .) "'" {
+        // if it's an array, that means we have an escape sequence
         // so we're just gonna let the js interpreter evaluate it
-    	if ( typeof( val ) !== "string" )
+        if ( typeof( val ) !== "string" )
         {
-        	val = eval( "'" + val.join( "" ) + "'" );
-		}
+            val = eval( "'" + val.join( "" ) + "'" );
+        }
     
-    	return val.codePointAt( 0 );
+        return val.codePointAt( 0 );
     }
 
 //
