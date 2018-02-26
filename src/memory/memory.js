@@ -1,5 +1,80 @@
 
 const i32 = require( "./i32" );
+
+//
+// MemoryMap
+//
+
+const MemoryMapInitializer = {
+    "instruction": ( map, line ) => {
+
+        // add the instruction into the map at the current position
+        map.instruction[ map.offset ] = line.data;
+
+        // add in null data for the data of the instruction
+        map.data[ map.offset ] = i32.from( 0 );
+
+        // each instruction is 4 bytes long (32 bits)
+        map.offset += 4;
+    },
+
+    "label": ( map, line ) => {
+        // insert the label, don't touch the offset though
+        map.labels[ line.data ] = map.offset;
+    },
+
+    "directive": ( map, line ) => {
+        switch ( line.name )
+        {
+            case ".global":
+                if ( typeof( line.data ) !== "string" )
+                {
+                    throw ".global must be followed by a label name"
+                }
+                map.metadata[ ".global" ] = line.data;
+                break;
+            
+            default:
+                throw "Unrecognized or unsupported directive: " + line.name;
+                break;
+        }
+    },
+};
+
+class MemoryMap
+{
+    constructor()
+    {
+        this.offset = 0;
+        this.labels = {};       // String -> Offset
+        this.instructions = {}; // Offset -> Instruction
+        this.data = {};         // Offset -> i32
+        this.metadata = {};     // String -> {}
+    }
+
+    /**
+     * Creates a new memory map from the given parser output.
+     * 
+     * @param {[ParsedLines]} lines The output from the parser.
+     */
+    static create( lines )
+    {
+        let map = new MemoryMap();
+
+        for ( let line in lines )
+        {
+            MemoryMapInitializer[ line.type ]( map, line );
+        }
+    }
+
+};
+module.exports.MemoryMap = MemoryMap;
+
+//
+// RegisterFile
+//
+
+// how many registers are in a register file?
 const REGISTER_COUNT = 16;
 
 // special bit names for the status register
