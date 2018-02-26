@@ -57,8 +57,8 @@ class I32
         for ( let i = 0; i < SIZE; i++ )
         {
             // grab only the bit we're looking at, and if it's negative, then
-            // we're going to flip it ()
-            bits[ SIZE - i - 1 ] = ( ( value >> i ) & 1 ) ^ negative;
+            // we're going to flip it
+            bits[ i ] = ( ( value >> i ) & 1 ) ^ negative;
         }
 
         return new I32( bits );
@@ -76,7 +76,7 @@ class I32
         let out = 0;
         for ( let i = 0; i < SIZE; i++ )
         {
-            out += this.bits[ i ] << ( SIZE - i - 1 );
+            out += this.bits[ i ] << i;
         }
         return out;
     }
@@ -86,18 +86,24 @@ class I32
      */
     get unsigned()
     {
-        let out = this.bits[ 0 ] * Math.pow( 2, SIZE - 1 );
-        for ( let i = 1; i < SIZE; i++ )
+        // highest-order bit must be calculated without bit shifting,
+        // because js will perform signed logical shifts, so this will
+        // produce a negative number if it's on (which is just plain wrong).
+        let out = this.bits[ SIZE - 1 ] * Math.pow( 2, SIZE - 1 );
+
+        for ( let i = 0; i < SIZE - 1; i++ )
         {
-            out += this.bits[ i ] << ( SIZE - i - 1 );
+            out += this.bits[ i ] << i;
         }
         return out;
     }
 
     get binary()
     {
-        // join the bits together without spaces, gg ez
-        return "0b" + this.bits.join( "" );
+        // the bits are in reverse order (i.e. [0] is the right-most bit if you write it
+        // out by hand and [31] is the left-most), so we join to string then split it to
+        // create a copy of the array, so that the reverse won't modify the original list
+        return "0b" + this.bits.join( "" ).split( "" ).reverse().join( "" );
     }
 
     get hex()
@@ -192,7 +198,7 @@ class I32
 
         let bits = [];
         let carry = 0;
-        for ( let i = SIZE - 1; i >= 0; i-- )
+        for ( let i = 0; i < SIZE; i++ )
         {
             let sum = this.bits[ i ] + operand.bits[ i ] + carry;
 
@@ -201,10 +207,15 @@ class I32
         }
 
         // set the overflow and carry flags if necessary
-        let flags = {
-            overflow: ( operand.bits[ 0 ] === this.bits[ 0 ] ) && ( this.bits[ 0 ] != bits[ 0 ] ),
-            carry: carry !== 0,
-        };
+        let flags = ( () => {
+            let sameInputSign = this.bits[ SIZE - 1 ] === operand.bits[ SIZE - 1 ];
+            let sameOutputSign = this.bits[ SIZE - 1 ] === bits[ SIZE - 1 ];
+
+            return {
+                overflow: sameInputSign && !sameOutputSign,
+                carry: carry != 0
+            };
+        } )();
 
         return new I32( bits, flags );
     }

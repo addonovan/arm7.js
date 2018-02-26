@@ -18,15 +18,6 @@ describe( "i32", () => {
         it( "should be a function", () => {
             expect( i32.from ).to.be.a( "function" );
         } );
-
-        it( "should return an i32 representing the given number", () => {
-            expect( i32.from( 0x00000000 ).bits.join( "" ) ).to.be
-                .equal( "00000000000000000000000000000000" );
-            expect( i32.from( 0x7FFFFFFF ).bits.join( "" ) ).to.be
-                .equal( "01111111111111111111111111111111" );
-            expect( i32.from( 0xFFFFFFFF ).bits.join( "" ) ).to.be
-                .equal( "11111111111111111111111111111111" );
-        } );
     } );
 
     describe( "signed", () => {
