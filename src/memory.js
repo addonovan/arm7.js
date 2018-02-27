@@ -1,4 +1,3 @@
-
 const i32 = require( "./i32" );
 
 //
@@ -9,10 +8,7 @@ const MemoryMapInitializer = {
     "instruction": ( map, line ) => {
 
         // add the instruction into the map at the current position
-        map.instruction[ map.offset ] = line.data;
-
-        // add in null data for the data of the instruction
-        map.data[ map.offset ] = i32.from( 0 );
+        map.instructions[ map.offset ] = line.data;
 
         // each instruction is 4 bytes long (32 bits)
         map.offset += 4;
@@ -61,8 +57,9 @@ class MemoryMap
     {
         let map = new MemoryMap();
 
-        for ( let line in lines )
+        for ( let i = 0; i < lines.length; i++ )
         {
+            let line = lines[ i ];
             MemoryMapInitializer[ line.type ]( map, line );
         }
     }
@@ -94,8 +91,13 @@ const ASPR_INDEX = 15;
  */
 class RegisterFile
 {
-    constructor()
+    /**
+     * @param {function(number, i32, i32)} onValueChange Callback fired when a register value changes.
+     */
+    constructor( onValueChange )
     {
+        this.onValueChange = onValueChange;
+
         // initialize all the registers
         this.registers = [];
         for ( let i = 0; i < REGISTER_COUNT; i++ )
@@ -118,7 +120,7 @@ class RegisterFile
         }
 
         // i32s are immutable, so no need for a copy
-        return this.registers[ i ];
+        return this.registers[ index ];
     }
 
     /**
@@ -137,12 +139,14 @@ class RegisterFile
 
         if ( typeof( value ) === "number" )
         {
-            this.registers[ i ] = i32.from( value );
+            value = i32.from( value );   
         }
-        else
-        {
-            this.registers[ i ] = value;
-        }
+
+        let old = this.registers[ index ];
+        this.registers[ index ] = value;
+
+        // call the callback
+        this.onValueChange( index, old, value );
     }
 
     /**
@@ -154,11 +158,12 @@ class RegisterFile
      */
     set status( flags )
     {
-        let statusRegister = this.aspr();
+        let statusRegister = this.aspr.copy();
         statusRegister.bits[ BIT_N ] = flags.negative   ? 1 : 0;
         statusRegister.bits[ BIT_Z ] = flags.zero       ? 1 : 0;
         statusRegister.bits[ BIT_C ] = flags.carry      ? 1 : 0;
         statusRegister.bits[ BIT_V ] = flags.overflow   ? 1 : 0;
+        this.aspr = statusRegister;
     }
 
     /**
@@ -166,7 +171,7 @@ class RegisterFile
      */
     get status()
     {
-        let statusRegister = this.aspr();
+        let statusRegister = this.aspr;
         return {
             negative:   statusRegister.bits[ BIT_N ] === 1,
             zero:       statusRegister.bits[ BIT_Z ] === 1,
@@ -187,12 +192,22 @@ class RegisterFile
         return this.get( SP_INDEX );
     }
 
+    set sp( value )
+    {
+        this.set( SP_INDEX, value );
+    }
+
     /**
      * Link Register
      */
     get lr()
     {
         return this.get( LR_INDEX );
+    }
+
+    set lr( value )
+    {
+        this.set( LR_INDEX, value );
     }
 
     /**
@@ -203,12 +218,22 @@ class RegisterFile
         return this.get( PC_INDEX );
     }
 
+    set pc( value )
+    {
+        this.set( PC_INDEX, value );
+    }
+
     /**
      * Active Program Status Register (aka Status Register)
      */
     get aspr()
     {
         return this.get( ASPR_INDEX );
+    }
+
+    set aspr( value )
+    {
+        this.set( ASPR_INDEX, value );
     }
 
 }

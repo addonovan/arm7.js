@@ -163,6 +163,11 @@ class I32
     // Bit-wise Operations
     //
 
+    copy()
+    {
+        return new I32( this.bits );
+    }
+
     complement()
     {
         // flip all of the bits

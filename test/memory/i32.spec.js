@@ -1,6 +1,6 @@
 "use strict"
 
-const i32 = require( "../../src/memory/i32.js" );
+const i32 = require( "../../src/i32.js" );
 const expect = require( "chai" ).expect;
 
 const INT_MAX = 2147483647;
