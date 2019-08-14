@@ -2,12 +2,12 @@
 
 /** Register page. Registers are accessed by their names and are read & set like members of a class. */
 const reg = (function() {
-	// because we are using 32-bits we can safely put everything into a 64-bit float
-	// which all numbers in javascript are.
+    // because we are using 32-bits we can safely put everything into a 64-bit float
+    // which all numbers in javascript are.
     const main = Array(17).fill(0);
 
     // create facade to easily access the registers by name
-	// but still ensure that they're all integer values by |0'ing them
+    // but still ensure that they're all integer values by |0'ing them
     class Register {
         get r0() { return main[0] | 0; }
         set r0(r0) { main[0] = r0 | 0; }
@@ -44,20 +44,20 @@ const reg = (function() {
         set pc(pc) { main[15] = pc | 0; }
         get aspr() { return main[16] | 0; }
         set aspr(aspr) { main[16] = aspr | 0; }
-		
-		direct(address, value) {
-			address = address | 0;
-			if (address < 0 || address > 16) {
-				throw "RegisterAccess: Address out of range: " + address;
-			}
-			
-			// if there's no value, then this is a get
-			if (typeof(value) === "undefined") {
-				return main[address];
-			} else {
-				main[address] = value | 0;
-			}
-		}
+        
+        direct(address, value) {
+            address = address | 0;
+            if (address < 0 || address > 16) {
+                throw "RegisterAccess: Address out of range: " + address;
+            }
+            
+            // if there's no value, then this is a get
+            if (typeof(value) === "undefined") {
+                return main[address];
+            } else {
+                main[address] = value | 0;
+            }
+        }
     }
 
     return new Register();
@@ -65,86 +65,86 @@ const reg = (function() {
 
 /** Random Access memory, can be directly indexed by memory addresses just like an array. */
 const mem = (function() {
-	const memory = {
-		//   10987654321098765432109876543210
-		0: 0b00000000101000100001000000000000
-	}; // {number: number} map of all memory values
-	
-	return new Proxy(memory, {
-		get: (memory, address) => (memory[address | 0] | 0) || 0,
-		set: (memory, address, value) => memory[address | 0] = value | 0
-	});
+    const memory = {
+        //   10987654321098765432109876543210
+        0: 0b00000000101000100001000000000000
+    }; // {number: number} map of all memory values
+    
+    return new Proxy(memory, {
+        get: (memory, address) => (memory[address | 0] | 0) || 0,
+        set: (memory, address, value) => memory[address | 0] = value | 0
+    });
 })();
 
 const pipeline = (function() {
-	function combineBits(bits, start, stop) {
-		var out = 0;
-		for (var i = start; i < stop; i++) {
-			out |= bits[i] << (i - start);
-		}
-		return out;
-	}
-	
-	const instructionPatterns = [
-		// each entry will decode its specific bit pattern into an executable function if it matches,
-		// otherwise it will return null.
-		// the first line of each checks if any of the bits are "wrong", an inverted bit will need to
-		//  be on to match, an uninverted bit will need to be off.
-		
-		// https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf
-		// ADD
-		(bits) => {
-			if (!bits[21] || bits[22] || !bits[23] || bits[24] || bits[26] || bits[27]) return;
-			
-			return function() {
-				// dst = dst + rhs
-				var dst = combineBits(bits, 12, 15);
-				var rhs = combineBits(bits, 16, 19);
-				var shouldUpdate = bits[20] === 1;
-				
-				reg.direct(dst, reg.direct(dst) + reg.direct(rhs));
-			}
-		},
-	];
-	
-	/**
-	 * Gets the bytes of the next instruction.
-	 */
-	function fetch() { 
-		return mem[reg.pc]; 
-	}
-	
-	/**
-	 * Decodes the given memory instruction into an easy-to-execute object.
-	 */
-	function decode(instruction) {
-		// decompose the number into its constituent bits for easier accessing
-		const bits = Array(32);
-		for (var i = 0; i < 32; i++) {
-			bits[i] = (instruction >> i) & 1;
-		}
-		
-		// go through all instruction patterns until we find a match (if any)
-		for (var i = 0; i < instructionPatterns.length; i++) {
-			let result = instructionPatterns[i](bits);
-			if (typeof(result) === "undefined") continue;
-			return result;
-		}
-		
-		throw "Pipeline: Failed to decode instruction (" + bits.join("") + ")";
-	}
-	
-	function execute(instruction) {
-		instruction();
-	}
-	
+    function combineBits(bits, start, stop) {
+        var out = 0;
+        for (var i = start; i < stop; i++) {
+            out |= bits[i] << (i - start);
+        }
+        return out;
+    }
+    
+    const instructionPatterns = [
+        // each entry will decode its specific bit pattern into an executable function if it matches,
+        // otherwise it will return null.
+        // the first line of each checks if any of the bits are "wrong", an inverted bit will need to
+        //  be on to match, an uninverted bit will need to be off.
+        
+        // https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf
+        // ADD
+        (bits) => {
+            if (!bits[21] || bits[22] || !bits[23] || bits[24] || bits[26] || bits[27]) return;
+            
+            return function() {
+                // dst = dst + rhs
+                var dst = combineBits(bits, 12, 15);
+                var rhs = combineBits(bits, 16, 19);
+                var shouldUpdate = bits[20] === 1;
+                
+                reg.direct(dst, reg.direct(dst) + reg.direct(rhs));
+            }
+        },
+    ];
+    
+    /**
+     * Gets the bytes of the next instruction.
+     */
+    function fetch() { 
+        return mem[reg.pc]; 
+    }
+    
+    /**
+     * Decodes the given memory instruction into an easy-to-execute object.
+     */
+    function decode(instruction) {
+        // decompose the number into its constituent bits for easier accessing
+        const bits = Array(32);
+        for (var i = 0; i < 32; i++) {
+            bits[i] = (instruction >> i) & 1;
+        }
+        
+        // go through all instruction patterns until we find a match (if any)
+        for (var i = 0; i < instructionPatterns.length; i++) {
+            let result = instructionPatterns[i](bits);
+            if (typeof(result) === "undefined") continue;
+            return result;
+        }
+        
+        throw "Pipeline: Failed to decode instruction (" + bits.join("") + ")";
+    }
+    
+    function execute(instruction) {
+        instruction();
+    }
+    
     function pump() {
-		let result = execute(decode(fetch()));
-	}
+        let result = execute(decode(fetch()));
+    }
 
     function flush() {
-		// do nothing (for now)
-	}
+        // do nothing (for now)
+    }
 
     return {
         flush: flush,
