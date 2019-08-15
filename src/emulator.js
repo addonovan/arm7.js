@@ -169,9 +169,29 @@ const display = (function() {
         displaySchemeKey(displayBits(word, instr));
     }
     
+    function updateRegisters() {
+        var registerNames = {
+            13: "sp",
+            14: "lr",
+            15: "pc",
+            16: "aspr"
+        };
+        
+        let html = "<table><tr><th>Register</th><th>Value</th></tr>";
+        for (let i = 0; i < 17; i++) {
+            let name = i in registerNames ? registerNames[i] : "r" + i;
+            let value = utils.splitToBits(reg.direct(i)).reverse().join("");
+            html += "<tr><td>" + name + "</td><td>" + value + "</td></tr>";
+        }
+        html += "</table>"
+        
+        document.querySelector("#registers").innerHTML = html;
+    }
+    
     return {
         update: function() {
             updateInstructionOverview();
+            updateRegisters();
         }
     };
 })();
@@ -300,4 +320,3 @@ const utils = (function() {
         getColorScheme
     };
 })();
-
