@@ -386,3 +386,5 @@ const utils = (function() {
         getColorScheme
     };
 })();
+
+display.update();
