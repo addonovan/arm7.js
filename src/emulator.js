@@ -4,49 +4,48 @@
 const reg = (function() {
     // because we are using 32-bits we can safely put everything into a 64-bit float
     // which all numbers in javascript are.
-    const main = Array(17).fill(0);
-
+    const main = new Uint32Array(17);
+    
     // create facade to easily access the registers by name
-    // but still ensure that they're all integer values by |0'ing them
     class Register {
-        get r0() { return main[0] | 0; }
-        set r0(r0) { main[0] = r0 | 0; }
-        get r1() { return main[1] | 0; }
-        set r1(r1) { main[1] = r1 | 0; }
-        get r2() { return main[2] | 0; }
-        set r2(r2) { main[2] = r2 | 0; }
-        get r3() { return main[3] | 0; }
-        set r3(r3) { main[3] = r3 | 0; }
-        get r4() { return main[4] | 0; }
-        set r4(r4) { main[4] = r4 | 0; }
-        get r5() { return main[5] | 0; }
-        set r5(r5) { main[5] = r5 | 0; }
-        get r6() { return main[6] | 0; }
-        set r6(r6) { main[6] = r6 | 0; }
-        get r7() { return main[7] | 0; }
-        set r7(r7) { main[7] = r7 | 0; }
-        get r8() { return main[8] | 0; }
-        set r8(r8) { main[8] = r8 | 0; }
-        get r9() { return main[9] | 0; }
-        set r9(r9) { main[9] = r9 | 0; }
-        get r10() { return main[10] | 0; }
-        set r10(r10) { main[10] = r10 | 0; }
-        get r11() { return main[11] | 0; }
-        set r11(r11) { main[11] = r11 | 0; }
-        get r12() { return main[12] | 0; }
-        set r12(r12) { main[12] = r12 | 0; }
+        get r0() { return main[0]; }
+        set r0(r0) { main[0] = r0; }
+        get r1() { return main[1]; }
+        set r1(r1) { main[1] = r1; }
+        get r2() { return main[2]; }
+        set r2(r2) { main[2] = r2; }
+        get r3() { return main[3]; }
+        set r3(r3) { main[3] = r3; }
+        get r4() { return main[4]; }
+        set r4(r4) { main[4] = r4; }
+        get r5() { return main[5]; }
+        set r5(r5) { main[5] = r5; }
+        get r6() { return main[6]; }
+        set r6(r6) { main[6] = r6; }
+        get r7() { return main[7]; }
+        set r7(r7) { main[7] = r7; }
+        get r8() { return main[8]; }
+        set r8(r8) { main[8] = r8; }
+        get r9() { return main[9]; }
+        set r9(r9) { main[9] = r9; }
+        get r10() { return main[10]; }
+        set r10(r10) { main[10] = r10; }
+        get r11() { return main[11]; }
+        set r11(r11) { main[11] = r11; }
+        get r12() { return main[12]; }
+        set r12(r12) { main[12] = r12; }
 
-        get sp() { return main[13] | 0; }
-        set sp(sp) { main[13] = sp | 0; }
-        get lr() { return main[14] | 0; }
-        set lr(lr) { main[14] = lr | 0; }
-        get pc() { return main[15] | 0; }
-        set pc(pc) { main[15] = pc | 0; }
-        get aspr() { return main[16] | 0; }
-        set aspr(aspr) { main[16] = aspr | 0; }
+        get sp() { return main[13]; }
+        set sp(sp) { main[13] = sp; }
+        get lr() { return main[14]; }
+        set lr(lr) { main[14] = lr; }
+        get pc() { return main[15]; }
+        set pc(pc) { main[15] = pc; }
+        get aspr() { return main[16]; }
+        set aspr(aspr) { main[16] = aspr; }
         
         direct(address, value) {
-            address = address | 0;
+            address = address >>> 0;
             if (address < 0 || address > 16) {
                 throw "RegisterAccess: Address out of range: " + address;
             }
@@ -55,7 +54,7 @@ const reg = (function() {
             if (typeof(value) === "undefined") {
                 return main[address];
             } else {
-                main[address] = value | 0;
+                main[address] = value;
             }
         }
     }
@@ -72,8 +71,16 @@ const mem = (function() {
     }; // {number: number} map of all memory values
     
     return new Proxy(memory, {
-        get: (memory, address) => (memory[address | 0] | 0) || 0,
-        set: (memory, address, value) => memory[address | 0] = value | 0
+        get: (memory, address) => {
+            if (address === "maxAddress") {
+                return Math.max(...Object.keys(memory));
+            } else if (address === "keys") {
+                return Object.keys(memory);
+            }
+            
+            return (memory[address >>> 0] >>> 0) || 0;
+        },
+        set: (memory, address, value) => memory[address >>> 0] = value >>> 0
     });
 })();
 
@@ -181,17 +188,57 @@ const display = (function() {
         for (let i = 0; i < 17; i++) {
             let name = i in registerNames ? registerNames[i] : "r" + i;
             let value = utils.splitToBits(reg.direct(i)).reverse().join("");
-            html += "<tr><td>" + name + "</td><td>" + value + "</td></tr>";
+            html += "<tr><td class='register name'>" + name + "</td>" + 
+                    "<td class='register value'>" + value + "</td></tr>";
         }
         html += "</table>"
         
         document.querySelector("#registers").innerHTML = html;
     }
     
+    function updateMemory() {
+        function createRow(address, value) {
+            var row = document.createElement("tr");
+            
+            var addressElement = document.createElement("td");
+            addressElement.appendChild(document.createTextNode(address));
+            row.appendChild(addressElement);
+            
+            var valueElement = document.createElement("td");
+            valueElement.appendChild(document.createTextNode(value));
+            row.appendChild(valueElement);
+            
+            return row;
+        }
+        
+        var memory = document.querySelector("#memory");
+        while (memory.firstChild) memory.removeChild(memory.firstChild);
+        
+        var table = document.createElement("table");
+        table.innerHTML = "<tr><th>Address</th><th>Value</th></tr>";
+        memory.appendChild(table);
+        
+        let lastKey = -1;
+        for (let key of mem.keys) {
+            key = parseInt(key);
+            
+            // if there was a gap between addresses, put the spacing indicator
+            if (key - 1 !== lastKey) {
+                table.appendChild(createRow("...", "..."));
+            }
+            lastKey = key;
+            
+            let address = utils.toHexString(key);
+            let value = utils.toBinaryString(mem[key]);
+            table.appendChild(createRow(address, value));
+        }
+    }
+    
     return {
         update: function() {
             updateInstructionOverview();
             updateRegisters();
+            updateMemory();
         }
     };
 })();
@@ -300,6 +347,18 @@ const utils = (function() {
         return out;
     }
     
+    function toBinaryString(word) {
+        var padded = "00000000000000000000000000000000" + word.toString(2);
+        var stripped = padded.substring(padded.length - 32);
+        return "0b" + stripped;
+    }
+    
+    function toHexString(word) {
+        var padded = "00000000" + word.toString(16).toUpperCase();
+        var stripped = padded.substring(padded.length - 8);
+        return "0x" + stripped;
+    }
+    
     function getColorScheme() {
         return [
             "#bf0d3e", 
@@ -317,6 +376,9 @@ const utils = (function() {
     return {
         splitToBits,
         combineBits,
+        toBinaryString,
+        toHexString,
         getColorScheme
     };
 })();
+
