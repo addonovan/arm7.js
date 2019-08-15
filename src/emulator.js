@@ -86,16 +86,8 @@ const pipeline = (function() {
         return mem[reg.pc]; 
     }
     
-    /**
-     * Decodes the given memory instruction into an easy-to-execute object.
-     */
     function decode(word) {
-        // decompose the number into its constituent bits for easier accessing
-        const bits = Array(32);
-        for (var i = 0; i < 32; i++) {
-            bits[i] = (word >> i) & 1;
-        }
-        
+        let bits = utils.splitToBits(word);
         return instruction.decodeToAction(bits);
     }
     
@@ -120,20 +112,55 @@ const pipeline = (function() {
 
 const display = (function() {
     
-    function showDecodedInstruction() {
+    function updateInstructionOverview() {
+        function displayBits(word, instruction) {
+            // process the instruction to label each bit with a selector
+            // and match each argument name to a color
+            let scheme = utils.getColorScheme();
+            let bits = Array(32).fill(null);
+            let colors = {};
+            
+            for (let argumentName in instruction.bits) {
+                if (!(argumentName in colors)) {
+                    colors[argumentName] = scheme.shift();
+                }
+                
+                let value = instruction.bits[argumentName];
+                if (typeof(value) === "number") {
+                    bits[value] = argumentName;
+                } else if (typeof(value) === "object") {
+                    for (let i = value.start; i <= value.stop; i++) {
+                        bits[i] = argumentName;
+                    }
+                }
+            }
+            
+            // now generate all of the spans for the bits
+            let html = "";
+            for (let i = 31; i >= 0; i--) {
+                let name = bits[i];
+                let color = colors[name];
+                let bit = word[i];
+                html += "<span class='instr bit " + name + "' style='color:" + color + ";'>" + bit + "</span>";
+            }
+            
+            // generate colors for each of these argument names
+            document.querySelector("#instruction").innerHTML = html;
+        }
+        
+        var word = utils.splitToBits(mem[reg.pc]);
+        var instr = instruction.decode(word);
+        displayBits(word, instr);
     }
     
-});
+    return {
+        update: function() {
+            updateInstructionOverview();
+        }
+    };
+})();
 
 const instruction = (function() {
-    function combineBits(bits, start, stop) {
-        var out = 0;
-        for (var i = start; i <= stop; i++) {
-            out |= bits[i] << (i - start);
-        }
-        return out;
-    }
-    
     // https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf
     const ops = [
         {
@@ -205,7 +232,7 @@ const instruction = (function() {
             if (typeof(value) === "number") {
                 values[varName] = bits[value];
             } else if (typeof(value) === "object") {
-                values[varName] = combineBits(bits, value.start, value.stop);
+                values[varName] = utils.combineBits(bits, value.start, value.stop);
             } else {
                 throw "InstructionError: Invalid operation bit";
             }
@@ -217,6 +244,44 @@ const instruction = (function() {
     return {
         decode: findOperation,
         decodeToAction: decodeBits
+    };
+})();
+
+const utils = (function() {
+    function splitToBits(word) {
+        let bits = Array(32);
+        for (let i = 0; i < 32; i++) {
+            bits[i] = (word >> i) & 1;
+        }
+        return bits;
+    }
+    
+    function combineBits(bits, start, stop) {
+        let out = 0;
+        for (let i = start; i <= stop; i++) {
+            out |= bits[i] << (i - start);
+        }
+        return out;
+    }
+    
+    function getColorScheme() {
+        return [
+            "#bf0d3e", 
+            "#00205b",
+            "#b58900",
+            "#cb4b16",
+            "#d30102",
+            "#6c71c4",
+            "#268bd2",
+            "#2aa198",
+            "#859900"
+        ];
+    }
+    
+    return {
+        splitToBits,
+        combineBits,
+        getColorScheme
     };
 })();
 
