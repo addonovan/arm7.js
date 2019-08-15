@@ -1,5 +1,11 @@
 <html>
+    <head>
+        <link rel="stylesheet" href="emulator.css"/>
+    </head>
+
     <body>
+        <button onclick="pipeline.pump(); display.update();">Step</button>
+    
         <div>
             <h1>Current Instruction</h1>
             <span id="instruction"></span>
