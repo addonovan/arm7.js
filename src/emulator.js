@@ -67,7 +67,8 @@ const reg = (function() {
 const mem = (function() {
     const memory = {
         //   10987654321098765432109876543210
-        0: 0b00000000101000100001000000000000
+        0: 0b00000000100000100001000000000000,
+        1: 0b00001010000000000000000000000000
     }; // {number: number} map of all memory values
     
     return new Proxy(memory, {
@@ -77,35 +78,6 @@ const mem = (function() {
 })();
 
 const pipeline = (function() {
-    function combineBits(bits, start, stop) {
-        var out = 0;
-        for (var i = start; i < stop; i++) {
-            out |= bits[i] << (i - start);
-        }
-        return out;
-    }
-    
-    const instructionPatterns = [
-        // each entry will decode its specific bit pattern into an executable function if it matches,
-        // otherwise it will return null.
-        // the first line of each checks if any of the bits are "wrong", an inverted bit will need to
-        //  be on to match, an uninverted bit will need to be off.
-        
-        // https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf
-        // ADD
-        (bits) => {
-            if (!bits[21] || bits[22] || !bits[23] || bits[24] || bits[26] || bits[27]) return;
-            
-            return function() {
-                // dst = dst + rhs
-                var dst = combineBits(bits, 12, 15);
-                var rhs = combineBits(bits, 16, 19);
-                var shouldUpdate = bits[20] === 1;
-                
-                reg.direct(dst, reg.direct(dst) + reg.direct(rhs));
-            }
-        },
-    ];
     
     /**
      * Gets the bytes of the next instruction.
@@ -117,24 +89,18 @@ const pipeline = (function() {
     /**
      * Decodes the given memory instruction into an easy-to-execute object.
      */
-    function decode(instruction) {
+    function decode(word) {
         // decompose the number into its constituent bits for easier accessing
         const bits = Array(32);
         for (var i = 0; i < 32; i++) {
-            bits[i] = (instruction >> i) & 1;
+            bits[i] = (word >> i) & 1;
         }
         
-        // go through all instruction patterns until we find a match (if any)
-        for (var i = 0; i < instructionPatterns.length; i++) {
-            let result = instructionPatterns[i](bits);
-            if (typeof(result) === "undefined") continue;
-            return result;
-        }
-        
-        throw "Pipeline: Failed to decode instruction (" + bits.join("") + ")";
+        return instruction.decodeToAction(bits);
     }
     
     function execute(instruction) {
+        reg.pc++;
         instruction();
     }
     
@@ -149,6 +115,108 @@ const pipeline = (function() {
     return {
         flush: flush,
         pump: pump
+    };
+})();
+
+const display = (function() {
+    
+    function showDecodedInstruction() {
+    }
+    
+});
+
+const instruction = (function() {
+    function combineBits(bits, start, stop) {
+        var out = 0;
+        for (var i = start; i <= stop; i++) {
+            out |= bits[i] << (i - start);
+        }
+        return out;
+    }
+    
+    // https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf
+    const ops = [
+        {
+            name: "Add",
+            bits: {
+                null: {21: 0, 22: 0, 23: 1, 24: 0, 26: 0, 27: 0},
+                "shifter": {start: 0, stop: 11},
+                "Rd": {start: 12, stop: 15},
+                "Rn": {start: 16, stop: 19},
+                "S": 20,
+                "I": 25,
+                "cond": {start: 28, stop: 31}
+            },
+            action: function(values) {
+                var rhs = reg.direct(values.Rd);
+                var lhs = reg.direct(values.Rn);
+                
+                reg.direct(values.Rd, rhs + lhs);
+            }
+        },
+        {
+            name: "Branch",
+            bits: {
+                null: {25: 1, 26: 0, 27: 1},
+                "signed_immed_24": {start: 0, stop: 23},
+                "L": 24,
+                "cond": {start: 28, stop: 31}
+            },
+            action: function(values) {
+                if (values.L === 1) {
+                    reg.lr = reg.pc;
+                }
+                reg.pc = reg.signed_immed_24;
+            }
+        }
+    ];
+
+    function findOperation(bits) {
+        let matched = ops.find(function(element) {
+            // if any of the bits from the constant part of the pattern
+            // do not match, then invalidate this operation pattern
+            let pattern = element.bits[null];
+            for (let index in pattern) {
+                if (bits[index] !== pattern[index]) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        
+        // if we didn't match a bit pattern, then that's a problem
+        if (typeof(matched) === "undefined") {
+            throw "InstructionError: Could not match bit pattern: " + bits.reverse().join("");
+        }
+        
+        return matched;
+    }
+    
+    function decodeBits(bits) {
+        let matched = findOperation(bits);
+        
+        // generate the values from the rest of the operation
+        var values = {};
+        for (let varName in matched.bits) {
+            if (varName === null) continue;
+            
+            // if value is a single bit, just save that one
+            var value = matched.bits[varName];
+            if (typeof(value) === "number") {
+                values[varName] = bits[value];
+            } else if (typeof(value) === "object") {
+                values[varName] = combineBits(bits, value.start, value.stop);
+            } else {
+                throw "InstructionError: Invalid operation bit";
+            }
+        }
+        
+        return () => matched.action(values);
+    }
+    
+    return {
+        decode: findOperation,
+        decodeToAction: decodeBits
     };
 })();
 
