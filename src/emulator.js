@@ -230,7 +230,12 @@ const display = (function() {
             
             let address = utils.toHexString(key);
             let value = utils.toBinaryString(mem[key]);
-            table.appendChild(createRow(address, value));
+            
+            let row = createRow(address, value);
+            if (reg.pc === key) {
+                row.classList.add("current");
+            }
+            table.appendChild(row);
         }
     }
     
@@ -381,4 +386,3 @@ const utils = (function() {
         getColorScheme
     };
 })();
-
