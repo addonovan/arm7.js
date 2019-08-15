@@ -146,11 +146,27 @@ const display = (function() {
             
             // generate colors for each of these argument names
             document.querySelector("#instruction").innerHTML = html;
+            
+            // return the color scheme this instruction is using
+            return colors;
+        }
+        
+        function displaySchemeKey(colorScheme) {
+            var html = "<ul>";
+            for (let name in colorScheme) {
+                let color = colorScheme[name];
+                // give an actual name to the identity
+                let displayName = name === "null" ? "identity" : name;
+                html += "<li class='" + name + "' style='color:" + color + ";'>" + displayName + "</li>";
+            }
+            html += "</ul>";
+            
+            document.querySelector("#instructionColorKey").innerHTML = html;
         }
         
         var word = utils.splitToBits(mem[reg.pc]);
         var instr = instruction.decode(word);
-        displayBits(word, instr);
+        displaySchemeKey(displayBits(word, instr));
     }
     
     return {
